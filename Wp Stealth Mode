@@ -1,0 +1,149 @@
+<?php
+/**
+ * Plugin Name: WP Stealth Mode
+ * Description: Hides WordPress fingerprints to reduce detection by Wappalyzer and other tools.
+ * Version: 1.0
+ * Author: Erickson Villeta
+ * Author URI: https://ericksonvilleta.com
+ * Plugin URI: https://ibuildawesomewebsite.com
+ */
+
+// ========== ADMIN SETTINGS PAGE ==========
+function wpsm_register_settings() {
+    add_option('wpsm_disable_feeds', 1);
+    add_option('wpsm_hide_login', 1);
+    add_option('wpsm_obfuscate_dirs', 1);
+    add_option('wpsm_custom_login_slug', 'my-login');
+    register_setting('wpsm_options_group', 'wpsm_disable_feeds');
+    register_setting('wpsm_options_group', 'wpsm_hide_login');
+    register_setting('wpsm_options_group', 'wpsm_obfuscate_dirs');
+    register_setting('wpsm_options_group', 'wpsm_custom_login_slug');
+}
+add_action('admin_init', 'wpsm_register_settings');
+
+function wpsm_register_options_page() {
+    add_options_page('WP Stealth Mode Settings', 'WP Stealth Mode', 'manage_options', 'wpsm', 'wpsm_options_page');
+}
+add_action('admin_menu', 'wpsm_register_options_page');
+
+function wpsm_options_page() {
+?>
+<div class="wrap">
+    <h2>WP Stealth Mode Settings</h2>
+    <form method="post" action="options.php">
+        <?php settings_fields('wpsm_options_group'); ?>
+        <table class="form-table">
+            <tr valign="top">
+                <th scope="row">Disable Feeds</th>
+                <td><input type="checkbox" name="wpsm_disable_feeds" value="1" <?php checked(1, get_option('wpsm_disable_feeds'), true); ?> /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row">Hide wp-login.php</th>
+                <td><input type="checkbox" name="wpsm_hide_login" value="1" <?php checked(1, get_option('wpsm_hide_login'), true); ?> /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row">Custom Login URL</th>
+                <td><input type="text" name="wpsm_custom_login_slug" value="<?php echo esc_attr(get_option('wpsm_custom_login_slug', 'my-login')); ?>" /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row">Obfuscate /wp-content/ and /wp-includes/</th>
+                <td><input type="checkbox" name="wpsm_obfuscate_dirs" value="1" <?php checked(1, get_option('wpsm_obfuscate_dirs'), true); ?> /></td>
+            </tr>
+        </table>
+        <?php submit_button(); ?>
+    </form>
+</div>
+<?php }
+
+// ========== CORE STEALTH FUNCTIONS ==========
+
+remove_action('wp_head', 'wp_generator');
+remove_action('wp_head', 'rest_output_link_wp_head', 10);
+remove_action('wp_head', 'wp_oembed_add_discovery_links', 10);
+remove_action('template_redirect', 'rest_output_link_header', 11, 0);
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('wp_print_styles', 'print_emoji_styles');
+remove_action('wp_head', 'wlwmanifest_link');
+remove_action('wp_head', 'rsd_link');
+remove_action('wp_head', 'wp_shortlink_wp_head');
+remove_action('wp_head', 'feed_links', 2);
+remove_action('wp_head', 'feed_links_extra', 3);
+
+add_action('wp_default_scripts', function ($scripts) {
+    if (!is_admin() && isset($scripts->registered['jquery'])) {
+        $script = $scripts->registered['jquery'];
+        if ($script->deps) {
+            $script->deps = array_diff($script->deps, ['jquery-migrate']);
+        }
+    }
+});
+
+add_filter('script_loader_src', function ($src) {
+    return remove_query_arg('ver', $src);
+}, 9999);
+
+add_filter('style_loader_src', function ($src) {
+    return remove_query_arg('ver', $src);
+}, 9999);
+
+// ========== CONDITIONAL FEATURE LOGIC ==========
+
+if (get_option('wpsm_disable_feeds')) {
+    add_action('do_feed', 'wpsm_disable_feeds_cb', 1);
+    add_action('do_feed_rdf', 'wpsm_disable_feeds_cb', 1);
+    add_action('do_feed_rss', 'wpsm_disable_feeds_cb', 1);
+    add_action('do_feed_rss2', 'wpsm_disable_feeds_cb', 1);
+    add_action('do_feed_atom', 'wpsm_disable_feeds_cb', 1);
+    function wpsm_disable_feeds_cb() {
+        wp_die(__('Feeds are disabled.'));
+    }
+}
+
+if (get_option('wpsm_hide_login')) {
+    add_action('init', function () {
+        if (strpos($_SERVER['REQUEST_URI'], 'wp-login.php') !== false || strpos($_SERVER['REQUEST_URI'], 'wp-login') !== false) {
+            wp_die('404 Not Found', 'Not Found', ['response' => 404]);
+        }
+    });
+}
+
+// Custom login URL routing
+add_action('init', function () {
+    $custom_slug = trim(get_option('wpsm_custom_login_slug'), '/');
+    if (empty($custom_slug)) return;
+
+    if (strpos($_SERVER['REQUEST_URI'], '/' . $custom_slug) !== false) {
+        require_once ABSPATH . 'wp-login.php';
+        exit;
+    }
+});
+
+if (get_option('wpsm_obfuscate_dirs')) {
+    add_filter('the_content', function ($content) {
+        $content = str_replace('/wp-content/', '/assets/', $content);
+        $content = str_replace('/wp-includes/', '/includes/', $content);
+        return $content;
+    });
+
+    add_action('template_redirect', function () {
+        ob_start(function ($buffer) {
+            $buffer = str_replace('/wp-content/', '/assets/', $buffer);
+            $buffer = str_replace('/wp-includes/', '/includes/', $buffer);
+            return $buffer;
+        });
+    });
+}
+
+// ========== BLOCK SCANNING TOOLS ==========
+add_action('init', function () {
+    $block_agents = [
+        'Wappalyzer', 'WPScan', 'BuiltWith', 'WhatRuns', 'nmap', 'netcraft', 'curl', 'python-requests', 'libwww-perl', 'nikto'
+    ];
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    foreach ($block_agents as $agent) {
+        if (stripos($ua, $agent) !== false) {
+            header('HTTP/1.1 403 Forbidden');
+            exit('Access denied.');
+        }
+    }
+});
