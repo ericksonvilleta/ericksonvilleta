@@ -19,6 +19,6 @@
 
 ⚡ Fun facts: juris doctor/otaku |
 - Poetry current published [micropoet](https://instagram.com/ericksonvilleta).
-🧩 A founding member of C.O.R.E. | [Play 2048  →](https://3p3US.yolasite.com)
+🧩 A founding member of C.O.R.E. | [Epeius →](https://3p3US.yolasite.com)
 
 ![](github-metrics.svg)
