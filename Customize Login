@@ -1,0 +1,53 @@
+// Customize wp-login.php page
+function custom_login_page_styles() {
+    // Custom CSS
+    echo '<style>
+        body.login {
+            background: #0d1117 !important;
+            color: #ffffff;
+        }
+        body.login #login {
+            padding: 40px;
+            background: #161b22;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.6);
+        }
+        body.login h1 a {
+            background-image: url("https://yourdomain.com/path-to-your-logo.png") !important;
+            background-size: contain !important;
+            width: 100% !important;
+            height: 80px !important;
+        }
+        body.login #backtoblog a, 
+        body.login #nav a {
+            color: #58a6ff !important;
+        }
+        body.login .button-primary {
+            background-color: #238636 !important;
+            border-color: #2ea043 !important;
+            box-shadow: none !important;
+        }
+        body.login .button-primary:hover {
+            background-color: #2ea043 !important;
+        }
+    </style>';
+}
+add_action('login_enqueue_scripts', 'custom_login_page_styles');
+
+// Change login logo URL
+function custom_login_logo_url() {
+    return home_url();
+}
+add_filter('login_headerurl', 'custom_login_logo_url');
+
+// Change login logo title text
+function custom_login_logo_title() {
+    return get_bloginfo('name');
+}
+add_filter('login_headertext', 'custom_login_logo_title');
+
+// Custom footer message on login page
+function custom_login_footer() {
+    echo '<p style="text-align: center; color: #888; font-size: 12px;">&copy; ' . date('Y') . ' Your Company. All rights reserved.</p>';
+}
+add_action('login_footer', 'custom_login_footer');
