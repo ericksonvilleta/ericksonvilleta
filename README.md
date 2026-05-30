@@ -11,7 +11,7 @@
 
 🔭 WordPress Human
 
-👯 I’m looking to collaborate on anything WordPress [WordPress.org Profile](https://profiles.wordpress.org/evilleta/) or Laravel Related
+👯 I’m looking to collaborate on anything [WordPress](https://profiles.wordpress.org/evilleta/) or Laravel Related
 🤔 I’m looking to help out with all Internet of Things.
 💬 Ask me about whatever you like, but I can't guarantee you'll like the answers.
 
