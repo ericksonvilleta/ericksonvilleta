@@ -1,6 +1,6 @@
 ### Welcome to Erickson Villeta on Github.
 
-![Typing SVG](https://readme-typing-svg.herokuapp.com?lines=Hi+there+%F0%9F%91%8B;I+am+Erick+Villeta.+Read+on+to+know+me)
+![Typing SVG](https://readme-typing-svg.herokuapp.com?lines=Hi+there+%F0%9F%91%8B;I+am+Erick+Villeta.+Read+to+know+me)
 
 ### 🤝🏻 Connect with Me
 
