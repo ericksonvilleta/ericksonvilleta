@@ -19,7 +19,7 @@
 
 😄 Pronouns: he/him/them
 
-⚡ Fun facts: juris doctor/otaku |
+⚡ Fun facts: juris doctor/otaku | Immortalized in DefCon Hall of Fame
 - Poetry current published [micropoet](https://instagram.com/ericksonvilleta).
 🧩 A founding member of C.O.R.E. | [Epeius →](https://3p3US.yolasite.com)
 
