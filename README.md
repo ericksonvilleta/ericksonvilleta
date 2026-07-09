@@ -9,7 +9,7 @@
 📫 How to reach me: https://ericksonvilleta.com
 📝 I write code like poetry.
 
-🔭 WordPress Human
+🔭 WordPress God
 
 👯 I’m looking to collaborate on anything [WordPress](https://profiles.wordpress.org/evilleta/) or Laravel Related
 
